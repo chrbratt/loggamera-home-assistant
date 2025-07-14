@@ -4,13 +4,10 @@ Retrieves temperature data from Loggamera IoT platform.
 """
 
 import logging
-import asyncio
-import aiohttp
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN
 
@@ -26,6 +23,11 @@ async def async_setup(hass: HomeAssistant, config: dict):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up Loggamera from a config entry."""
     _LOGGER.info("Setting up Loggamera integration with config entry")
+    
+    # Import dependencies only when needed to avoid blocking
+    import asyncio
+    import aiohttp
+    from homeassistant.helpers.aiohttp_client import async_get_clientsession
     
     # Test API connectivity before setting up platforms
     session = async_get_clientsession(hass)
@@ -61,10 +63,12 @@ async def _test_api_connectivity(session, sensor_id):
     
     async with session.post(url, data=data, timeout=10) as response:
         if response.status != 200:
+            import aiohttp
             raise aiohttp.ClientError(f"HTTP {response.status}")
         
         html = await response.text()
         if len(html) < 100:  # Basic sanity check
+            import aiohttp
             raise aiohttp.ClientError("Received empty or very short response")
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
