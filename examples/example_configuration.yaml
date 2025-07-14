@@ -1,0 +1,47 @@
+# Exempel konfiguration för Loggamera Integration
+# Kopiera detta till din configuration.yaml
+
+# Loggamera Custom Integration
+sensor:
+  - platform: loggamera
+    sensors:
+      - name: "Vättern Temperatur"
+        location_id: 22
+      - name: "Mullsjön Temperatur"
+        location_id: 21
+
+# Alternativ: REST Sensor som backup/jämförelse
+rest:
+  - resource: "https://portal.loggamera.se/PublicViews/OverviewInside"
+    method: POST
+    payload: "id=22"
+    headers:
+      Content-Type: "application/x-www-form-urlencoded"
+    scan_interval: 300  # 5 minuter
+    sensor:
+      - name: "Vättern REST Backup"
+        unique_id: "vattern_rest_backup"
+        value_template: >-
+          {% set ns = namespace(temp=None) %}
+          {% for line in value.split('\n') %}
+            {% set match = line | regex_findall('data-value="(-?\d+\.?\d*)"') %}
+            {% if match %}
+              {% set temp_val = match[0] | float %}
+              {% if -5 <= temp_val <= 40 %}
+                {% set ns.temp = temp_val %}
+                {% break %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.temp }}
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        icon: "mdi:waves"
+
+# Debug logging (lägg till om du behöver felsöka)
+logger:
+  default: info
+  logs:
+    custom_components.loggamera: debug
+    homeassistant.helpers.update_coordinator: debug 

@@ -1,0 +1,34 @@
+# Lägg till i din configuration.yaml
+
+# Command Line Sensor för Vättern badtemperatur (REKOMMENDERAS)
+command_line:
+  - sensor:
+      name: "Vättern Badtemperatur"
+      unique_id: "vattern_badtemperatur_cmd"
+      command: "python3 /config/ha_vattern_sensor.py"
+      unit_of_measurement: "°C"
+      device_class: "temperature"
+      state_class: "measurement"
+      icon: "mdi:waves"
+      scan_interval: 300  # 5 minuter
+      value_template: >-
+        {% if value != "unavailable" %}
+          {{ value | float | round(1) }}
+        {% else %}
+          unavailable
+        {% endif %}
+
+# Automation för att logga fel (valfritt)
+automation:
+  - alias: "Vättern Temperature Sensor Error"
+    trigger:
+      - platform: state
+        entity_id: sensor.vattern_badtemperatur
+        to: "unavailable"
+        for: "00:10:00"  # 10 minuter
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "Vattentemperatur Sensor Fel"
+          message: "Vättern badtemperatur-sensorn har varit otillgänglig i 10 minuter"
+          notification_id: "vattern_temp_error" 
