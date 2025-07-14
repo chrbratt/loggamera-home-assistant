@@ -51,7 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     
     # Forward to platforms one by one to avoid import blocking
     for platform in PLATFORMS:
-        await hass.config_entries.async_forward_entry_setup(entry, platform)
+        await hass.config_entries.async_forward_entry_setups(entry, [platform])
     return True
 
 async def _test_api_connectivity(session, sensor_id):
@@ -72,7 +72,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     # Unload platforms one by one to avoid import blocking
     unload_ok = True
     for platform in PLATFORMS:
-        if not await hass.config_entries.async_unload_platform(entry, platform):
+        if not await hass.config_entries.async_unload_platforms(entry, [platform]):
             unload_ok = False
     
     if unload_ok:
