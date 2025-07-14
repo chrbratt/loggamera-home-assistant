@@ -10,7 +10,7 @@ DEVICE_IDENTIFIER = "hjo_energi_badtemperaturer"
 DEVICE_NAME = "Hjo Energi Badtemperaturer"
 DEVICE_MANUFACTURER = "chrbratt"
 DEVICE_MODEL = "Loggamera Temperatursensorer from Hjo Energi AB"
-DEVICE_SW_VERSION = "1.0.7"
+DEVICE_SW_VERSION = "1.0.8"
 
 # Available sensor locations
 SENSORS = {
