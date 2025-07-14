@@ -156,18 +156,24 @@ class LoggameraDataUpdateCoordinator(DataUpdateCoordinator):
                 html = await response.text()
                 _LOGGER.debug(f"Received {len(html)} characters from API for location {self.location_id}")
                 
-                # Parse HTML using BeautifulSoup like the working scraper
+                # Parse HTML using BeautifulSoup 
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                # Find elements with class containing 'read-capability'
-                temp_elements = soup.find_all(class_=re.compile(r'read-capability'))
+                # Find elements with class 'display-value' (new API structure)
+                temp_elements = soup.find_all(class_='display-value')
                 
-                _LOGGER.debug(f"Found {len(temp_elements)} elements with 'read-capability' class")
+                _LOGGER.debug(f"Found {len(temp_elements)} elements with 'display-value' class")
                 
                 for element in temp_elements:
-                    if 'data-value' in element.attrs:
-                        temp_value = element.get('data-value')
-                        _LOGGER.debug(f"Found data-value: {temp_value}")
+                    temp_text = element.get_text().strip()
+                    _LOGGER.debug(f"Found display-value text: '{temp_text}'")
+                    
+                    # Extract numeric value from text like "24.6°C"
+                    import re
+                    temp_match = re.search(r'([-+]?\d*\.?\d+)', temp_text)
+                    if temp_match:
+                        temp_value = temp_match.group(1)
+                        _LOGGER.debug(f"Extracted temperature value: {temp_value}")
                         
                         try:
                             temp = float(temp_value)
