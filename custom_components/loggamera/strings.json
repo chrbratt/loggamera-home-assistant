@@ -1,0 +1,22 @@
+{
+  "config": {
+    "title": "Loggamera Temperature Sensors",
+    "step": {
+      "user": {
+        "title": "Konfigurera Loggamera Sensorer",
+        "description": "Denna integration hämtar temperaturdata från Loggamera-plattformen för {sensors}.",
+        "data": {
+          "setup": "Konfigurera sensorer"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kunde inte ansluta till Loggamera",
+      "invalid_response": "Ogiltigt svar från server",
+      "unknown": "Oväntat fel inträffade"
+    },
+    "abort": {
+      "already_configured": "Loggamera är redan konfigurerad"
+    }
+  }
+} 
