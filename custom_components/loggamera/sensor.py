@@ -9,8 +9,8 @@ import logging
 from datetime import timedelta
 
 import voluptuous as vol
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import TEMP_CELSIUS
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
+from homeassistant.const import UnitOfTemperature
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DeviceInfo
 import homeassistant.helpers.config_validation as cv
@@ -34,7 +34,7 @@ PLATFORM_SCHEMA = vol.Schema({
         vol.Schema({
             vol.Required("name"): cv.string,
             vol.Required("location_id"): cv.positive_int,
-            vol.Optional("unit", default=TEMP_CELSIUS): cv.string,
+            vol.Optional("unit", default=UnitOfTemperature.CELSIUS): cv.string,
             vol.Optional("scan_interval", default=300): vol.All(
                 cv.positive_int, 
                 vol.Range(min=60, max=86400)
@@ -95,7 +95,7 @@ async def async_setup_entry(
                 coordinator,
                 f"{SENSORS[sensor_id]} Temperature",
                 sensor_id,
-                TEMP_CELSIUS,
+                UnitOfTemperature.CELSIUS,
                 scan_interval_seconds
             ))
     
@@ -174,12 +174,12 @@ class LoggameraTemperatureSensor(CoordinatorEntity, SensorEntity):
     @property
     def device_class(self):
         """Return the device class."""
-        return "temperature"
+        return SensorDeviceClass.TEMPERATURE
     
     @property
     def state_class(self):
         """Return the state class."""
-        return "measurement"
+        return SensorStateClass.MEASUREMENT
     
     @property
     def icon(self):

@@ -1,7 +1,7 @@
 {
   "domain": "loggamera",
   "name": "Loggamera Temperature Sensors",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "documentation": "https://github.com/chrbratt/loggamera-home-assistant",
   "issue_tracker": "https://github.com/chrbratt/loggamera-home-assistant/issues",
   "dependencies": [],
