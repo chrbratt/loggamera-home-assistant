@@ -1,14 +1,14 @@
 # Loggamera Home Assistant Integration
 
-A professional Home Assistant integration for retrieving water temperature data from Hjo Energi's Loggamera IoT sensors.
+Home Assistant integration for retrieving water temperature data from Hjo Energi's Loggamera IoT sensors.
 
 ## Features
 
-- Real-time water temperature monitoring
+- Water temperature monitoring
 - Configurable update intervals (1 minute to 12 hours)
 - Support for multiple sensor locations
 - HACS compatible
-- Reliable error handling and logging
+- Error handling and logging
 
 ## Installation
 
@@ -45,8 +45,8 @@ sensor:
 
 | Location | ID | Description |
 |----------|-----|-------------|
-| Lake Vättern | 22 | Main lake temperature sensor |
-| Lake Mullsjön | 21 | Secondary lake temperature sensor |
+| Lake Vättern | 22 | Lake temperature sensor |
+| Lake Mullsjön | 21 | Lake temperature sensor |
 
 ## Configuration Options
 
@@ -71,4 +71,4 @@ For issues and feature requests, please use the [GitHub issue tracker](https://g
 This integration provides water temperature monitoring from Hjo Energi AB's lakes using their Loggamera IoT sensor platform. Specifically designed for accessing public water temperature data from Lake Vättern and Lake Mullsjön in Sweden.
 
 ---
-**Version**: 1.0.0 | **HACS Compatible** ✅ 
+**Version**: 1.0.0 | HACS Compatible 
