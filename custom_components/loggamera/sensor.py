@@ -26,7 +26,7 @@ _LOGGER = logging.getLogger(__name__)
 DOMAIN = "loggamera"
 DEFAULT_SCAN_INTERVAL = 300  # 5 minutes in seconds
 MIN_SCAN_INTERVAL = 60       # 1 minute minimum
-MAX_SCAN_INTERVAL = 43200    # 12 hours maximum
+MAX_SCAN_INTERVAL = 86400    # 24 hours maximum
 
 PLATFORM_SCHEMA = vol.Schema({
     vol.Required("platform"): "loggamera",

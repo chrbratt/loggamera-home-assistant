@@ -5,7 +5,7 @@ Home Assistant integration for retrieving water temperature data from Hjo Energi
 ## Features
 
 - Water temperature monitoring
-- Configurable update intervals (1 minute to 12 hours)
+- Configurable update intervals (1 minute to 24 hours)
 - Support for multiple sensor locations
 - HACS compatible
 - Error handling and logging
