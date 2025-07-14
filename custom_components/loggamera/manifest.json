@@ -1,13 +1,14 @@
 {
   "domain": "loggamera",
   "name": "Loggamera Temperature Sensors",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "documentation": "https://github.com/chrbratt/loggamera-home-assistant",
   "issue_tracker": "https://github.com/chrbratt/loggamera-home-assistant/issues",
   "dependencies": [],
   "codeowners": ["@chrbratt"],
   "requirements": [
-    "aiohttp>=3.8.0"
+    "aiohttp>=3.8.0",
+    "beautifulsoup4>=4.9.0"
   ],
   "iot_class": "cloud_polling",
   "config_flow": true,

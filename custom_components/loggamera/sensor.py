@@ -9,8 +9,10 @@ import logging
 from datetime import timedelta
 
 import voluptuous as vol
+from bs4 import BeautifulSoup
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
 from homeassistant.const import UnitOfTemperature
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DeviceInfo
 import homeassistant.helpers.config_validation as cv
@@ -89,7 +91,14 @@ async def async_setup_entry(
             coordinator = LoggameraDataUpdateCoordinator(
                 hass, session, sensor_id, scan_interval
             )
-            await coordinator.async_config_entry_first_refresh()
+            
+            # Test API connectivity during setup
+            try:
+                await coordinator.async_config_entry_first_refresh()
+            except UpdateFailed as err:
+                _LOGGER.error(f"Failed to setup Loggamera sensor {sensor_id}: {err}")
+                # Don't raise ConfigEntryNotReady here - let individual coordinators handle retries
+                continue
             
             sensors.append(LoggameraTemperatureSensor(
                 coordinator,
@@ -98,6 +107,9 @@ async def async_setup_entry(
                 UnitOfTemperature.CELSIUS,
                 scan_interval_seconds
             ))
+    
+    if not sensors:
+        _LOGGER.warning("No Loggamera sensors could be set up")
     
     async_add_entities(sensors, True)
 
@@ -108,6 +120,7 @@ class LoggameraDataUpdateCoordinator(DataUpdateCoordinator):
         """Initialize the coordinator."""
         self.session = session
         self.location_id = location_id
+        self.api_url = "https://portal.loggamera.se/PublicViews/OverviewInside"
         super().__init__(
             hass,
             _LOGGER,
@@ -115,34 +128,73 @@ class LoggameraDataUpdateCoordinator(DataUpdateCoordinator):
             update_interval=scan_interval,
         )
     
+    async def _async_setup(self):
+        """Do initial setup - test API connectivity."""
+        _LOGGER.debug(f"Setting up Loggamera coordinator for location {self.location_id}")
+        
+        # Test initial connectivity
+        try:
+            await self._fetch_temperature()
+            _LOGGER.debug(f"Initial API test successful for location {self.location_id}")
+        except Exception as err:
+            _LOGGER.error(f"Initial API test failed for location {self.location_id}: {err}")
+            raise UpdateFailed(f"Cannot connect to Loggamera API: {err}")
+    
     async def _async_update_data(self):
         """Fetch data from Loggamera."""
+        return await self._fetch_temperature()
+    
+    async def _fetch_temperature(self):
+        """Fetch temperature data using BeautifulSoup parsing like the working scraper."""
         try:
-            url = "https://portal.loggamera.se/PublicViews/OverviewInside"
             data = {"id": self.location_id}
             
-            async with self.session.post(url, data=data, timeout=30) as response:
+            async with self.session.post(self.api_url, data=data, timeout=30) as response:
                 if response.status != 200:
-                    raise UpdateFailed(f"HTTP {response.status}")
+                    raise UpdateFailed(f"HTTP {response.status} from Loggamera API")
                 
                 html = await response.text()
+                _LOGGER.debug(f"Received {len(html)} characters from API for location {self.location_id}")
                 
-                # Extract temperature with regex
-                temp_pattern = r'data-value="(-?\d+\.?\d*)"'
-                matches = re.findall(temp_pattern, html)
+                # Parse HTML using BeautifulSoup like the working scraper
+                soup = BeautifulSoup(html, 'html.parser')
                 
-                for match in matches:
-                    temp = float(match)
-                    # Sanity check for reasonable water temperature
-                    if -5 <= temp <= 40:
-                        _LOGGER.debug(f"Retrieved temperature {temp}°C for location {self.location_id}")
-                        return temp
+                # Find elements with class containing 'read-capability'
+                temp_elements = soup.find_all(class_=re.compile(r'read-capability'))
                 
+                _LOGGER.debug(f"Found {len(temp_elements)} elements with 'read-capability' class")
+                
+                for element in temp_elements:
+                    if 'data-value' in element.attrs:
+                        temp_value = element.get('data-value')
+                        _LOGGER.debug(f"Found data-value: {temp_value}")
+                        
+                        try:
+                            temp = float(temp_value)
+                            # Sanity check for reasonable water temperature
+                            if -5 <= temp <= 40:
+                                _LOGGER.debug(f"Retrieved valid temperature {temp}°C for location {self.location_id}")
+                                return temp
+                            else:
+                                _LOGGER.warning(f"Temperature {temp}°C outside reasonable range for location {self.location_id}")
+                        except (ValueError, TypeError) as e:
+                            _LOGGER.debug(f"Could not parse temperature value '{temp_value}': {e}")
+                            continue
+                
+                # If no valid temperature found, log the HTML for debugging
+                _LOGGER.warning(f"No valid temperature found for location {self.location_id}")
+                _LOGGER.debug(f"HTML response preview: {html[:500]}...")
                 raise UpdateFailed("No valid temperature found in response")
                 
+        except asyncio.TimeoutError:
+            _LOGGER.error(f"Timeout while fetching data for location {self.location_id}")
+            raise UpdateFailed("Timeout while fetching data")
+        except aiohttp.ClientError as err:
+            _LOGGER.error(f"Client error for location {self.location_id}: {err}")
+            raise UpdateFailed(f"Network error: {err}")
         except Exception as err:
-            _LOGGER.error(f"Error communicating with Loggamera API: {err}")
-            raise UpdateFailed(f"Error communicating with API: {err}")
+            _LOGGER.error(f"Unexpected error for location {self.location_id}: {err}")
+            raise UpdateFailed(f"Unexpected error: {err}")
 
 class LoggameraTemperatureSensor(CoordinatorEntity, SensorEntity):
     """Loggamera temperature sensor."""
