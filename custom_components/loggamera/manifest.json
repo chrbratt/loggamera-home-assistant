@@ -1,7 +1,7 @@
 {
   "domain": "loggamera",
   "name": "Badtemperaturer Hjo Energi",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "documentation": "https://github.com/chrbratt/loggamera-home-assistant",
   "issue_tracker": "https://github.com/chrbratt/loggamera-home-assistant/issues",
   "homeassistant": "2023.1.0",
