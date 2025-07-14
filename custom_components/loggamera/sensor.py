@@ -18,7 +18,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, SENSORS
+from .const import DOMAIN, SENSORS, get_device_info
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class LoggameraDataManager:
         self._update_lock = asyncio.Lock()
         
         # Status tracking
-        self.status = "Startar..."
+        self.status = "Starting..."
         self.last_error = None
         self.successful_updates = 0
         self.failed_updates = 0
@@ -120,12 +120,12 @@ class LoggameraDataManager:
                 self.last_error = None
                 self.successful_updates += 1
             elif success_count > 0:
-                self.status = "Delvis"
-                self.last_error = f"Några sensorer misslyckades: {'; '.join(errors)}"
+                self.status = "Partial"
+                self.last_error = f"Some sensors failed: {'; '.join(errors)}"
                 self.failed_updates += 1
             else:
-                self.status = "Fel"
-                self.last_error = f"Alla sensorer misslyckades: {'; '.join(errors)}"
+                self.status = "Error"
+                self.last_error = f"All sensors failed: {'; '.join(errors)}"
                 self.failed_updates += 1
             
             self.data = new_data
@@ -180,13 +180,7 @@ class LoggameraTemperatureSensor(SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, "hjo_energi_badtemperaturer")},
-            name="Hjo Energi Badtemperaturer",
-            manufacturer="Hjo Energi AB",
-            model="Loggamera Temperatursensorer",
-            sw_version="1.0.0",
-        )
+        return get_device_info()
     
     @property
     def native_value(self) -> float | None:
@@ -219,13 +213,7 @@ class LoggameraLastUpdatedSensor(SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, "hjo_energi_badtemperaturer")},
-            name="Hjo Energi Badtemperaturer",
-            manufacturer="Hjo Energi AB",
-            model="Loggamera Temperatursensorer",
-            sw_version="1.0.0",
-        )
+        return get_device_info()
     
     @property
     def native_value(self) -> datetime | None:
@@ -264,13 +252,7 @@ class LoggameraStatusSensor(SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, "hjo_energi_badtemperaturer")},
-            name="Hjo Energi Badtemperaturer",
-            manufacturer="Hjo Energi AB",
-            model="Loggamera Temperatursensorer",
-            sw_version="1.0.0",
-        )
+        return get_device_info()
     
     @property
     def native_value(self) -> str:
@@ -291,9 +273,9 @@ class LoggameraStatusSensor(SensorEntity):
         """Return icon based on status."""
         if self.data_manager.status == "OK":
             return "mdi:check-circle"
-        elif self.data_manager.status == "Delvis":
+        elif self.data_manager.status == "Partial":
             return "mdi:alert-circle"
-        elif self.data_manager.status == "Fel":
+        elif self.data_manager.status == "Error":
             return "mdi:close-circle"
         else:
             return "mdi:help-circle"
@@ -306,8 +288,8 @@ class LoggameraStatusSensor(SensorEntity):
         
         # Basic attributes always shown
         attrs = {
-            "senaste_uppdatering": self.data_manager.last_update,
-            "uppdateringsintervall_sekunder": self.data_manager.scan_interval.total_seconds(),
+            "last_update": self.data_manager.last_update,
+            "update_interval_seconds": self.data_manager.scan_interval.total_seconds(),
         }
         
         # Debug attributes only shown when debug mode is on
@@ -318,13 +300,13 @@ class LoggameraStatusSensor(SensorEntity):
             })
             
             if self.data_manager.last_error:
-                attrs["senaste_fel"] = self.data_manager.last_error
+                attrs["last_error"] = self.data_manager.last_error
                 
             # Add individual sensor debug status
             for sensor_id, sensor_data in self.data_manager.data.items():
                 sensor_name = SENSORS.get(sensor_id, f"Sensor {sensor_id}")
                 attrs[f"{sensor_name.lower().replace(' ', '_')}_status"] = (
-                    "OK" if sensor_data.get('available', False) else "Fel"
+                    "OK" if sensor_data.get('available', False) else "Error"
                 )
                 if sensor_data.get('temperature') is not None:
                     attrs[f"{sensor_name.lower().replace(' ', '_')}_temperatur"] = sensor_data['temperature']

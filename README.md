@@ -1,27 +1,27 @@
 # Badtemperaturer Hjo Energi
 
-Home Assistant integration för badtemperaturer från Hjo Energi AB:s sjöar.
+Home Assistant integration for water temperatures from Hjo Energi AB's lakes.
 
 ## Installation
 
 ### HACS
 1. HACS → Integrations → ⋮ → Custom repositories
-2. Lägg till: `chrbratt/loggamera-home-assistant`
-3. Installera "Badtemperaturer Hjo Energi"
-4. Starta om Home Assistant
+2. Add: `chrbratt/loggamera-home-assistant`
+3. Install "Badtemperaturer Hjo Energi"
+4. Restart Home Assistant
 
-### Konfiguration
-1. **Inställningar** → **Enheter & tjänster** → **Lägg till integration**
-2. Sök efter "Badtemperaturer Hjo Energi"
-3. Välj sjöar:
+### Configuration
+1. **Settings** → **Devices & services** → **Add integration**
+2. Search for "Badtemperaturer Hjo Energi"
+3. Select lakes:
    - Vättern
    - Mullsjön
-4. Färdig!
+4. Done!
 
 ## Data
-- **Vättern**: Badtemperatur från sjön Vättern
-- **Mullsjön**: Badtemperatur från Mullsjön
-- **Uppdatering**: Var 5:e minut som standard
-- **Källa**: Hjo Energi AB via Loggamera
+- **Vättern**: Water temperature from Lake Vättern
+- **Mullsjön**: Water temperature from Lake Mullsjön  
+- **Updates**: Every 5 minutes by default
+- **Source**: Hjo Energi AB via Loggamera
 
-Data från Hjo Energi AB:s offentliga temperatursensorer. 
+Data from Hjo Energi AB's public temperature sensors. 

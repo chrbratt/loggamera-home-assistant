@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import DeviceInfo
 
-from .const import DOMAIN
+from .const import DOMAIN, get_device_info
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,13 +43,7 @@ class LoggameraUpdateIntervalNumber(NumberEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, "hjo_energi_badtemperaturer")},
-            name="Hjo Energi Badtemperaturer",
-            manufacturer="Hjo Energi AB",
-            model="Loggamera Temperatursensorer",
-            sw_version="1.0.0",
-        )
+        return get_device_info()
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the scan interval."""
@@ -68,8 +62,8 @@ class LoggameraUpdateIntervalNumber(NumberEntity):
         
         # Notify user that restart may be needed for full effect
         self.hass.components.persistent_notification.async_create(
-            f"Uppdateringsintervall ändrat till {int(value/60)} minuter. "
-            "Starta om integrationen för full effekt.",
+            f"Update interval changed to {int(value/60)} minutes. "
+            "Restart integration for full effect.",
             title="Badtemperaturer Hjo Energi",
             notification_id=f"{DOMAIN}_interval_changed"
         ) 

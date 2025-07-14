@@ -3,16 +3,18 @@
     "title": "Badtemperaturer Hjo Energi",
     "step": {
       "user": {
-        "title": "Konfigurera Badtemperaturer",
-        "description": "Hämta badtemperaturer från Vättern och Mullsjön via Hjo Energi AB.",
+        "title": "Välj sjöar att övervaka",
+        "description": "Välj vilka sjöar du vill övervaka badtemperaturer för:",
         "data": {
-          "setup": "Konfigurera sensorer"
+          "sensor_vattern": "Vättern",
+          "sensor_mullsjon": "Mullsjön"
         }
       }
     },
     "error": {
       "cannot_connect": "Kunde inte ansluta till temperatursensorer",
       "invalid_response": "Kunde inte läsa temperaturdata",
+      "no_sensors_selected": "Du måste välja minst en sjö att övervaka",
       "unknown": "Oväntat fel inträffade"
     },
     "abort": {

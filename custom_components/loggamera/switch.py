@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import DeviceInfo
 
-from .const import DOMAIN
+from .const import DOMAIN, get_device_info
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,13 +37,7 @@ class LoggameraDebugSwitch(SwitchEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, "hjo_energi_badtemperaturer")},
-            name="Hjo Energi Badtemperaturer",
-            manufacturer="Hjo Energi AB",
-            model="Loggamera Temperatursensorer",
-            sw_version="1.0.0",
-        )
+        return get_device_info()
 
     @property
     def is_on(self) -> bool:
