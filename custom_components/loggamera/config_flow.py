@@ -1,8 +1,7 @@
 """Config flow for Loggamera integration."""
 from homeassistant import config_entries
-import voluptuous as vol
 
-from .const import DOMAIN, SENSORS, DEFAULT_SCAN_INTERVAL
+from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
 
 class LoggameraConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Loggamera."""
@@ -11,6 +10,9 @@ class LoggameraConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
+        # Import voluptuous only when needed
+        import voluptuous as vol
+        
         errors = {}
         
         if user_input is not None:

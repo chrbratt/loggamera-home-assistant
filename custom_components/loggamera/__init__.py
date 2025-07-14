@@ -51,9 +51,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = entry.data
     
-    # Forward to platforms one by one to avoid import blocking
-    for platform in PLATFORMS:
-        await hass.config_entries.async_forward_entry_setups(entry, [platform])
+    # Load platforms asynchronously to avoid blocking
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 async def _test_api_connectivity(session, sensor_id):
@@ -73,11 +72,8 @@ async def _test_api_connectivity(session, sensor_id):
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
-    # Unload platforms one by one to avoid import blocking
-    unload_ok = True
-    for platform in PLATFORMS:
-        if not await hass.config_entries.async_unload_platforms(entry, [platform]):
-            unload_ok = False
+    # Unload platforms asynchronously
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
