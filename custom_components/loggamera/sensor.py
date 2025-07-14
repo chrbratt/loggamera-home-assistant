@@ -67,6 +67,11 @@ async def async_setup_entry(
     # Add status sensor
     entities.append(LoggameraStatusSensor(data_manager, config_entry))
     
+    # Store entities in hass.data for number entity to access
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+    hass.data[DOMAIN]["entities"] = entities
+    
     # Add all entities
     async_add_entities(entities, True)
 

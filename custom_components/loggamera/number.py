@@ -53,6 +53,8 @@ class LoggameraUpdateIntervalNumber(NumberEntity):
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the scan interval."""
+        from datetime import timedelta
+        
         # Update config entry data
         new_data = dict(self._config_entry.data)
         new_data["scan_interval"] = int(value)
@@ -66,12 +68,21 @@ class LoggameraUpdateIntervalNumber(NumberEntity):
         
         _LOGGER.info(f"Updated scan interval to {int(value)} seconds")
         
+        # Update data manager if it exists
+        if DOMAIN in self.hass.data and self._config_entry.entry_id in self.hass.data[DOMAIN]:
+            # Get the data manager from sensor platform
+            for entity in self.hass.data[DOMAIN].get("entities", []):
+                if hasattr(entity, 'data_manager'):
+                    entity.data_manager.scan_interval = timedelta(seconds=int(value))
+                    _LOGGER.info(f"Updated data manager scan interval to {int(value)} seconds")
+                    break
+        
         # Notify user that restart may be needed for full effect
         from homeassistant.components.persistent_notification import async_create
         async_create(
             self.hass,
             f"Update interval changed to {int(value/60)} minutes. "
-            "Restart integration for full effect.",
+            "Sensors will use new interval immediately.",
             title="Badtemperaturer Hjo Energi",
             notification_id=f"{DOMAIN}_interval_changed"
         ) 
