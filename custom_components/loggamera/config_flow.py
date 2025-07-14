@@ -6,17 +6,11 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
 
-from .const import DOMAIN
+from .const import DOMAIN, SENSORS
 
 _LOGGER = logging.getLogger(__name__)
 
-# Available sensor locations
-SENSORS = {
-    22: "Lake Vättern",
-    21: "Lake Mullsjön"
-}
-
-# Scan interval options (in minutes for user-friendly display)
+# Scan interval options (in seconds for backend)
 SCAN_INTERVALS = {
     "1 minute": 60,
     "5 minutes": 300,
@@ -33,7 +27,6 @@ class LoggameraConfigFlow(config_entries.ConfigFlow):
 
     domain = DOMAIN
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
 
 
@@ -41,12 +34,17 @@ class LoggameraConfigFlow(config_entries.ConfigFlow):
         """Handle the initial step."""
         errors = {}
 
+        # Check if already configured
+        await self.async_set_unique_id(DOMAIN)
+        self._abort_if_unique_id_configured()
+
         if user_input is not None:
-            # Validate that at least one sensor is selected
-            selected_sensors = [
-                sensor_id for sensor_id, enabled in user_input.items() 
-                if sensor_id in SENSORS and enabled
-            ]
+            # Get selected sensors
+            selected_sensors = []
+            if user_input.get("sensor_vattern", False):
+                selected_sensors.append(22)
+            if user_input.get("sensor_mullsjon", False):
+                selected_sensors.append(21)
             
             if not selected_sensors:
                 errors["base"] = "no_sensors_selected"
@@ -64,10 +62,8 @@ class LoggameraConfigFlow(config_entries.ConfigFlow):
 
         # Create schema for sensor selection
         data_schema = vol.Schema({
-            **{
-                vol.Optional(sensor_id, default=True): cv.boolean
-                for sensor_id in SENSORS.keys()
-            },
+            vol.Optional("sensor_vattern", default=True): cv.boolean,
+            vol.Optional("sensor_mullsjon", default=True): cv.boolean,
             vol.Optional("scan_interval", default=300): vol.In(SCAN_INTERVALS.values())
         })
 
@@ -76,8 +72,8 @@ class LoggameraConfigFlow(config_entries.ConfigFlow):
             data_schema=data_schema,
             errors=errors,
             description_placeholders={
-                "sensor_22": SENSORS[22],
-                "sensor_21": SENSORS[21]
+                "sensor_vattern": "Lake Vättern (ID: 22)",
+                "sensor_mullsjon": "Lake Mullsjön (ID: 21)"
             }
         )
 
