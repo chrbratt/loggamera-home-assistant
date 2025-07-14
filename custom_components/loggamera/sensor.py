@@ -41,6 +41,13 @@ async def async_setup_entry(
     # Create shared data manager
     data_manager = LoggameraDataManager(hass, session, selected_sensors, scan_interval)
     
+    # Initial data fetch
+    try:
+        await data_manager.async_update_data()
+        _LOGGER.info("Initial data fetch successful")
+    except Exception as err:
+        _LOGGER.warning(f"Initial data fetch failed: {err}")
+    
     # Create entities
     entities = []
     
@@ -243,9 +250,16 @@ class LoggameraStatusSensor(SensorEntity):
         self.data_manager = data_manager
         self._config_entry = config_entry
         
-        self._attr_name = "System Status"
         self._attr_unique_id = f"{DOMAIN}_status"
         self._attr_icon = "mdi:check-network"
+    
+    @property
+    def name(self) -> str:
+        """Return the name of the sensor."""
+        debug_mode = self._config_entry.data.get("debug_mode", False)
+        if debug_mode:
+            return "System Status (DEBUG)"
+        return "System Status"
         
     @property
     def device_info(self) -> DeviceInfo:
@@ -261,6 +275,15 @@ class LoggameraStatusSensor(SensorEntity):
     @property
     def native_value(self) -> str:
         """Return the status value."""
+        debug_mode = self._config_entry.data.get("debug_mode", False)
+        
+        if debug_mode:
+            # Show detailed status in debug mode
+            status = self.data_manager.status
+            success = self.data_manager.successful_updates
+            failed = self.data_manager.failed_updates
+            return f"{status} ({success}✓/{failed}✗)"
+        
         return self.data_manager.status
     
     @property
