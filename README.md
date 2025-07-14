@@ -68,7 +68,7 @@ For issues and feature requests, please use the [GitHub issue tracker](https://g
 
 ## License
 
-This integration is developed for use with Hjo Energi AB's Loggamera IoT platform.
+This integration provides water temperature monitoring from Hjo Energi AB's lakes using their Loggamera IoT sensor platform. Specifically designed for accessing public water temperature data from Lake Vättern and Lake Mullsjön in Sweden.
 
 ---
 **Version**: 1.0.0 | **HACS Compatible** ✅ 
