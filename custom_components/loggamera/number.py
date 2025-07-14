@@ -67,7 +67,9 @@ class LoggameraUpdateIntervalNumber(NumberEntity):
         _LOGGER.info(f"Updated scan interval to {int(value)} seconds")
         
         # Notify user that restart may be needed for full effect
-        self.hass.components.persistent_notification.async_create(
+        from homeassistant.components.persistent_notification import async_create
+        async_create(
+            self.hass,
             f"Update interval changed to {int(value/60)} minutes. "
             "Restart integration for full effect.",
             title="Badtemperaturer Hjo Energi",
