@@ -1,8 +1,8 @@
 # 🌡️ Loggamera Home Assistant Integration
 
-Integration för att hämta badtemperaturer från Hjo Energis Loggamera IoT-plattform till Home Assistant.
+Home Assistant custom integration for retrieving water temperature data from Hjo Energi's Loggamera IoT platform.
 
-## 📁 Projektstruktur
+## 📁 Project Structure
 
 ```
 loggamera-home-assistant/
@@ -10,118 +10,158 @@ loggamera-home-assistant/
 │   ├── __init__.py                 # Integration setup
 │   ├── manifest.json               # HA metadata
 │   └── sensor.py                   # Sensor implementation
-├── docs/                           # 📚 DOKUMENTATION
-│   ├── TEST_GUIDE.md              # Steg-för-steg testguide
-│   ├── UTVECKLINGSPLAN.md         # Utvecklingsroadmap
-│   ├── INSTALL_HOME_ASSISTANT.md  # Installationsguide
-│   └── ha_methods_comparison.md   # Jämförelse av metoder
-├── examples/                       # 📋 EXEMPEL & KONFIGURATIONER
-│   ├── example_configuration.yaml # Klar HA konfiguration
-│   ├── ha_rest_optimized.yaml    # REST sensor alternativ
+├── docs/                           # 📚 DOCUMENTATION
+│   ├── TEST_GUIDE.md              # Step-by-step testing guide
+│   ├── UTVECKLINGSPLAN.md         # Development roadmap
+│   ├── INSTALL_HOME_ASSISTANT.md  # Installation guide
+│   └── ha_methods_comparison.md   # Method comparison
+├── examples/                       # 📋 EXAMPLES & CONFIGURATIONS
+│   ├── example_configuration.yaml # Ready HA configuration
+│   ├── ha_rest_optimized.yaml    # REST sensor alternative
 │   ├── ha_vattern_sensor.py      # Command line script
 │   ├── home_assistant_vattern_sensor.yaml
 │   └── home_assistant_command_line_sensor.yaml
-├── tests/                          # 🧪 TESTER
-│   ├── quick_api_test.py          # Snabb API test
+├── tests/                          # 🧪 TESTS
+│   ├── quick_api_test.py          # Quick API test
 │   └── test_loggamera.py          # Unit tests
 ├── config_flow.py                  # 🔧 Future: GUI setup
 └── loggamera_integration_v2.py    # 🚀 Future: Enhanced version
 ```
 
-## 🚀 Snabbstart
+## 🚀 Quick Start
 
-### 1. Installera Custom Integration
+### 1. Install via HACS (Recommended)
 
-Kopiera hela `custom_components/loggamera/` mappen till din Home Assistant:
+**Option A: HACS Custom Repository**
+1. Open HACS → Integrations
+2. Click ⋮ → Custom repositories
+3. Add repository: `chrbratt/loggamera-home-assistant`
+4. Category: `Integration`
+5. Install "Loggamera Temperature Sensors"
 
+**Option B: Manual Installation**
 ```bash
-# Kopiera till ditt HA system
+# Copy to your HA system
 cp -r custom_components/loggamera /config/custom_components/
 ```
 
-### 2. Konfigurera
+### 2. Configuration
 
-Använd `examples/example_configuration.yaml` som mall:
+Add to your `configuration.yaml`:
 
 ```yaml
 sensor:
   - platform: loggamera
     sensors:
-      - name: "Vättern Temperatur"
+      - name: "Lake Vättern Temperature"
         location_id: 22
-      - name: "Mullsjön Temperatur"
+        scan_interval: 300  # 5 minutes (60-43200 seconds)
+      - name: "Lake Mullsjön Temperature"
         location_id: 21
+        scan_interval: 600  # 10 minutes
 ```
 
-### 3. Testa
+### 3. Test API Connection
 
-Innan HA-konfiguration, testa API:et:
+Before configuring HA, test the API:
 
 ```bash
 cd tests/
 python3 quick_api_test.py
 ```
 
-### 4. Starta om HA
+### 4. Restart Home Assistant
 
-Efter konfiguration, starta om Home Assistant och kontrollera att sensorerna fungerar.
+After configuration, restart Home Assistant and verify sensors are working.
 
-## 📊 Sensordata
+## 📊 Sensor Data
 
-Integration hämtar temperaturer från:
-- **Vättern**: `location_id: 22` (Hjo Energi)
-- **Mullsjön**: `location_id: 21` (Hjo Energi)
+Integration retrieves temperatures from:
+- **Lake Vättern**: `location_id: 22` (Hjo Energi)
+- **Lake Mullsjön**: `location_id: 21` (Hjo Energi)
 
-**Uppdateringsintervall**: 5 minuter  
-**API-endpoint**: `https://portal.loggamera.se/PublicViews/OverviewInside`
+**Default Update Interval**: 5 minutes  
+**Configurable Range**: 1 minute - 12 hours (60-43200 seconds)  
+**API Endpoint**: `https://portal.loggamera.se/PublicViews/OverviewInside`
 
-## 🔧 Alternativa Metoder
+## ⚙️ Configuration Options
 
-| Metod | Komplexitet | Tillförlitlighet | Rekommendation |
-|-------|-------------|------------------|----------------|
-| **Custom Integration** | Medium | Hög | ✅ Bäst för avancerad användning |
-| **REST Sensor** | Låg | Hög | ✅ Bäst för enkla behov |
-| **Command Line** | Medium | Medium | ⚠️ Endast för utveckling |
+| Option | Required | Default | Range | Description |
+|--------|----------|---------|-------|-------------|
+| `name` | Yes | - | - | Sensor display name |
+| `location_id` | Yes | - | 21, 22 | Loggamera location ID |
+| `scan_interval` | No | 300 | 60-43200 | Update interval in seconds |
+| `unit` | No | °C | - | Temperature unit |
 
-Se `examples/` för alla metoder.
+## 🔧 Alternative Methods
 
-## 📚 Dokumentation
+| Method | Complexity | Reliability | Recommendation |
+|--------|------------|-------------|----------------|
+| **Custom Integration** | Medium | High | ✅ Best for advanced use |
+| **REST Sensor** | Low | High | ✅ Best for simple needs |
+| **Command Line** | Medium | Medium | ⚠️ Development only |
 
-- **[TEST_GUIDE.md](docs/TEST_GUIDE.md)** - Komplett testguide med felsökning
-- **[UTVECKLINGSPLAN.md](docs/UTVECKLINGSPLAN.md)** - Utvecklingsroadmap och arkitektur
-- **[INSTALL_HOME_ASSISTANT.md](docs/INSTALL_HOME_ASSISTANT.md)** - Detaljerad installation
-- **[ha_methods_comparison.md](docs/ha_methods_comparison.md)** - Metod-jämförelse
+See `examples/` for all methods.
 
-## 🧪 Tester
+## 📚 Documentation
+
+- **[TEST_GUIDE.md](docs/TEST_GUIDE.md)** - Complete testing guide with troubleshooting
+- **[UTVECKLINGSPLAN.md](docs/UTVECKLINGSPLAN.md)** - Development roadmap and architecture
+- **[INSTALL_HOME_ASSISTANT.md](docs/INSTALL_HOME_ASSISTANT.md)** - Detailed installation
+- **[ha_methods_comparison.md](docs/ha_methods_comparison.md)** - Method comparison
+
+## 🧪 Testing
 
 ```bash
 # API test
 cd tests/
 python3 quick_api_test.py
 
-# Unit tests (kräver pytest)
+# Unit tests (requires pytest)
 python3 -m pytest test_loggamera.py -v
 ```
 
-## 🚀 Framtida Utveckling
+## 🚀 Future Development
 
-- **v2.0**: Enhanced version med retry logic och caching (`loggamera_integration_v2.py`)
-- **Config Flow**: GUI setup i Home Assistant (`config_flow.py`)
-- **Flera sensorer**: Utöka till fler Loggamera-sensorer
-- **Automation**: Smarta regler baserat på temperatur
+- **v2.0**: Enhanced version with retry logic and caching (`loggamera_integration_v2.py`)
+- **Config Flow**: GUI setup in Home Assistant (`config_flow.py`)
+- **Multiple Sensors**: Expand to more Loggamera sensors
+- **Automation**: Smart rules based on temperature
 
 ## 📞 Support
 
-1. **Kör `quick_api_test.py`** först - löser 80% av problemen
-2. **Kontrollera HA loggar** för felmeddelanden
-3. **Jämför med REST sensor** i `examples/` som backup
-4. **Läs `TEST_GUIDE.md`** för detaljerad felsökning
+1. **Run `quick_api_test.py`** first - solves 80% of issues
+2. **Check HA logs** for error messages
+3. **Compare with REST sensor** in `examples/` as backup
+4. **Read `TEST_GUIDE.md`** for detailed troubleshooting
+
+## 🏷️ HACS Integration
+
+This integration is compatible with:
+- **Home Assistant**: 2023.1+
+- **HACS**: Custom repository support
+- **Python**: 3.9+
+
+To add as HACS custom repository:
+```
+Repository: chrbratt/loggamera-home-assistant
+Category: Integration
+```
+
+## 📋 Changelog
+
+### v1.0.0
+- Initial release
+- Support for Vättern and Mullsjön temperature sensors
+- Configurable update intervals (1 min - 12 hours)
+- HACS compatibility
+- English documentation
 
 ## 🏷️ Tags
 
-`home-assistant` `loggamera` `hjo-energi` `badtemperatur` `vattern` `iot` `sensors` `custom-integration`
+`home-assistant` `hacs` `loggamera` `hjo-energi` `water-temperature` `vattern` `iot` `sensors` `custom-integration` `sweden`
 
 ---
 
-**Utvecklad för Hjo Energi AB's Loggamera IoT-plattform**  
-Version: 1.0 | Status: Produktionsklar ✅ 
+**Developed for Hjo Energi AB's Loggamera IoT Platform**  
+Version: 1.0.0 | Status: Production Ready ✅ | HACS Compatible 🏪 

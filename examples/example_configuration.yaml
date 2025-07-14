@@ -1,23 +1,31 @@
-# Exempel konfiguration för Loggamera Integration
-# Kopiera detta till din configuration.yaml
+# Example configuration for Loggamera Integration
+# Copy this to your configuration.yaml
 
 # Loggamera Custom Integration
 sensor:
   - platform: loggamera
     sensors:
-      - name: "Vättern Temperatur"
+      - name: "Lake Vättern Temperature"
         location_id: 22
-      - name: "Mullsjön Temperatur"
+        scan_interval: 300  # 5 minutes (default)
+      - name: "Lake Mullsjön Temperature"
         location_id: 21
+        scan_interval: 600  # 10 minutes
+      - name: "Vättern Fast Updates"
+        location_id: 22
+        scan_interval: 60   # 1 minute (minimum)
+      - name: "Mullsjön Slow Updates"
+        location_id: 21
+        scan_interval: 3600 # 1 hour
 
-# Alternativ: REST Sensor som backup/jämförelse
+# Alternative: REST Sensor as backup/comparison
 rest:
   - resource: "https://portal.loggamera.se/PublicViews/OverviewInside"
     method: POST
     payload: "id=22"
     headers:
       Content-Type: "application/x-www-form-urlencoded"
-    scan_interval: 300  # 5 minuter
+    scan_interval: 300  # 5 minutes
     sensor:
       - name: "Vättern REST Backup"
         unique_id: "vattern_rest_backup"
@@ -39,9 +47,18 @@ rest:
         state_class: measurement
         icon: "mdi:waves"
 
-# Debug logging (lägg till om du behöver felsöka)
+# Debug logging (add if you need troubleshooting)
 logger:
   default: info
   logs:
     custom_components.loggamera: debug
-    homeassistant.helpers.update_coordinator: debug 
+    homeassistant.helpers.update_coordinator: debug
+
+# Configuration Options:
+# scan_interval: 60-43200 seconds (1 minute - 12 hours)
+# - 60: 1 minute (minimum, frequent updates)
+# - 300: 5 minutes (default, balanced)
+# - 600: 10 minutes (moderate)
+# - 1800: 30 minutes (slow)
+# - 3600: 1 hour (very slow)
+# - 43200: 12 hours (maximum, minimal updates) 

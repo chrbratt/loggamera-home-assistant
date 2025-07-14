@@ -1,6 +1,6 @@
 """
-Loggamera Temperature Sensor Integration för Home Assistant
-Placera denna fil i custom_components/loggamera/sensor.py
+Loggamera Temperature Sensor Integration for Home Assistant
+Place this file in custom_components/loggamera/sensor.py
 """
 
 import asyncio
@@ -24,7 +24,9 @@ from homeassistant.helpers.update_coordinator import (
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "loggamera"
-SCAN_INTERVAL = timedelta(minutes=5)
+DEFAULT_SCAN_INTERVAL = 300  # 5 minutes in seconds
+MIN_SCAN_INTERVAL = 60       # 1 minute minimum
+MAX_SCAN_INTERVAL = 43200    # 12 hours maximum
 
 PLATFORM_SCHEMA = vol.Schema({
     vol.Required("platform"): "loggamera",
@@ -33,18 +35,24 @@ PLATFORM_SCHEMA = vol.Schema({
             vol.Required("name"): cv.string,
             vol.Required("location_id"): cv.positive_int,
             vol.Optional("unit", default=TEMP_CELSIUS): cv.string,
+            vol.Optional("scan_interval", default=DEFAULT_SCAN_INTERVAL): vol.All(
+                cv.positive_int, 
+                vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)
+            ),
         })
     ])
 })
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Sätt upp Loggamera-sensorer."""
+    """Set up Loggamera sensors."""
     session = async_get_clientsession(hass)
     
     sensors = []
     for sensor_config in config["sensors"]:
+        scan_interval = timedelta(seconds=sensor_config["scan_interval"])
+        
         coordinator = LoggameraDataUpdateCoordinator(
-            hass, session, sensor_config["location_id"]
+            hass, session, sensor_config["location_id"], scan_interval
         )
         await coordinator.async_config_entry_first_refresh()
         
@@ -52,27 +60,28 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             coordinator,
             sensor_config["name"],
             sensor_config["location_id"],
-            sensor_config["unit"]
+            sensor_config["unit"],
+            sensor_config["scan_interval"]
         ))
     
     async_add_entities(sensors, True)
 
 class LoggameraDataUpdateCoordinator(DataUpdateCoordinator):
-    """Koordinator för att hämta data från Loggamera."""
+    """Coordinator for fetching data from Loggamera."""
     
-    def __init__(self, hass, session, location_id):
-        """Initiera koordinatorn."""
+    def __init__(self, hass, session, location_id, scan_interval):
+        """Initialize the coordinator."""
         self.session = session
         self.location_id = location_id
         super().__init__(
             hass,
             _LOGGER,
             name=f"loggamera_{location_id}",
-            update_interval=SCAN_INTERVAL,
+            update_interval=scan_interval,
         )
     
     async def _async_update_data(self):
-        """Hämta data från Loggamera."""
+        """Fetch data from Loggamera."""
         try:
             url = "https://portal.loggamera.se/PublicViews/OverviewInside"
             data = {"id": self.location_id}
@@ -83,76 +92,82 @@ class LoggameraDataUpdateCoordinator(DataUpdateCoordinator):
                 
                 html = await response.text()
                 
-                # Extrahera temperatur med regex
+                # Extract temperature with regex
                 temp_pattern = r'data-value="(-?\d+\.?\d*)"'
                 matches = re.findall(temp_pattern, html)
                 
                 for match in matches:
                     temp = float(match)
-                    # Sanity check
+                    # Sanity check for reasonable water temperature
                     if -5 <= temp <= 40:
+                        _LOGGER.debug(f"Retrieved temperature {temp}°C for location {self.location_id}")
                         return temp
                 
-                raise UpdateFailed("Ingen giltig temperatur hittades")
+                raise UpdateFailed("No valid temperature found in response")
                 
         except Exception as err:
+            _LOGGER.error(f"Error communicating with Loggamera API: {err}")
             raise UpdateFailed(f"Error communicating with API: {err}")
 
 class LoggameraTemperatureSensor(CoordinatorEntity, SensorEntity):
-    """Loggamera temperatursensor."""
+    """Loggamera temperature sensor."""
     
-    def __init__(self, coordinator, name, location_id, unit):
-        """Initiera sensorn."""
+    def __init__(self, coordinator, name, location_id, unit, scan_interval):
+        """Initialize the sensor."""
         super().__init__(coordinator)
         self._name = name
         self._location_id = location_id
         self._unit = unit
+        self._scan_interval = scan_interval
         self._attr_unique_id = f"loggamera_{location_id}"
     
     @property
     def name(self):
-        """Returnera sensorns namn."""
+        """Return the name of the sensor."""
         return self._name
     
     @property
     def state(self):
-        """Returnera sensorns tillstånd."""
+        """Return the state of the sensor."""
         return self.coordinator.data
     
     @property
     def unit_of_measurement(self):
-        """Returnera enhet."""
+        """Return the unit of measurement."""
         return self._unit
     
     @property
     def device_class(self):
-        """Returnera device class."""
+        """Return the device class."""
         return "temperature"
     
     @property
     def state_class(self):
-        """Returnera state class."""
+        """Return the state class."""
         return "measurement"
     
     @property
     def icon(self):
-        """Returnera ikon."""
+        """Return the icon."""
         return "mdi:waves"
     
     @property
     def device_info(self) -> DeviceInfo:
-        """Returnera device info."""
+        """Return device info."""
         return DeviceInfo(
             identifiers={(DOMAIN, f"location_{self._location_id}")},
             name=f"Loggamera Location {self._location_id}",
             manufacturer="Loggamera",
             model="Temperature Sensor",
+            configuration_url="https://portal.loggamera.se/",
         )
     
     @property
     def extra_state_attributes(self):
-        """Returnera extra attribut."""
+        """Return extra state attributes."""
         return {
             "location_id": self._location_id,
             "source": "Loggamera Portal",
+            "scan_interval_seconds": self._scan_interval,
+            "api_endpoint": "https://portal.loggamera.se/PublicViews/OverviewInside",
         } 
