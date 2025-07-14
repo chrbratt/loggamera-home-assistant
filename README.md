@@ -24,4 +24,47 @@ Home Assistant integration for water temperatures from Hjo Energi AB's lakes.
 - **Updates**: Every 5 minutes by default
 - **Source**: Hjo Energi AB via Loggamera
 
+## Statistics
+
+For daily and weekly averages, use Home Assistant's built-in Statistics integration:
+
+### Enable Statistics
+1. **Settings** → **Devices & services** → **Add integration**
+2. Search for "Statistics"
+3. Add the integration
+
+### Configure Statistics for Lakes
+Add to your `configuration.yaml`:
+
+```yaml
+# Daily averages
+sensor:
+  - platform: statistics
+    name: "Vättern Dygnsmedelvärde"
+    entity_id: sensor.vattern_badtemperatur
+    state_characteristic: mean
+    sampling_size: 288  # 5-min intervals per day
+
+  - platform: statistics
+    name: "Mullsjön Dygnsmedelvärde"
+    entity_id: sensor.mullsjon_badtemperatur
+    state_characteristic: mean
+    sampling_size: 288
+
+# Weekly averages
+  - platform: statistics
+    name: "Vättern Veckomedelvärde"
+    entity_id: sensor.vattern_badtemperatur
+    state_characteristic: mean
+    sampling_size: 2016  # 5-min intervals per week
+
+  - platform: statistics
+    name: "Mullsjön Veckomedelvärde"
+    entity_id: sensor.mullsjon_badtemperatur
+    state_characteristic: mean
+    sampling_size: 2016
+```
+
+This provides accurate daily and weekly averages using Home Assistant's proven statistics engine.
+
 Data from Hjo Energi AB's public temperature sensors. 

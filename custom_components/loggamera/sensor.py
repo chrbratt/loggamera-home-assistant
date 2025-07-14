@@ -71,13 +71,6 @@ async def async_setup_entry(
     # Add status sensor
     entities.append(LoggameraStatusSensor(coordinator, config_entry))
     
-    # Add statistics sensors for each lake
-    for sensor_id in selected_sensors:
-        if sensor_id in SENSORS:
-            lake_name = SENSORS[sensor_id]
-            entities.append(LoggameraDailyAverageSensor(coordinator, sensor_id, lake_name))
-            entities.append(LoggameraWeeklyAverageSensor(coordinator, sensor_id, lake_name))
-    
     # Store entities in hass.data for number entity to access
     if DOMAIN not in hass.data:
         hass.data[DOMAIN] = {}
@@ -346,86 +339,4 @@ class LoggameraStatusSensor(CoordinatorEntity, SensorEntity):
     @property
     def available(self) -> bool:
         """Return if entity is available."""
-        return True  # Status sensor is always available
-
-class LoggameraDailyAverageSensor(CoordinatorEntity, SensorEntity):
-    """Daily average temperature sensor for a specific lake."""
-    
-    def __init__(self, coordinator: LoggameraDataCoordinator, sensor_id: int, lake_name: str):
-        """Initialize daily average sensor."""
-        super().__init__(coordinator)
-        self.sensor_id = sensor_id
-        self.lake_name = lake_name
-        
-        self._attr_name = f"{lake_name} Dygnsmedelvärde"
-        self._attr_unique_id = f"{DOMAIN}_{sensor_id}_daily_average"
-        self._attr_device_class = SensorDeviceClass.TEMPERATURE
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-        self._attr_icon = "mdi:thermometer-water"
-        
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Return device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, DEVICE_IDENTIFIER)},
-            name=DEVICE_NAME,
-            manufacturer=DEVICE_MANUFACTURER,
-            model=DEVICE_MODEL,
-            sw_version=DEVICE_SW_VERSION,
-        )
-    
-    @property
-    def native_value(self) -> float | None:
-        """Calculate daily average temperature."""
-        # For now, return current temperature as placeholder
-        # In a real implementation, you'd store historical data
-        sensor_data = self.coordinator.data.get(self.sensor_id, {})
-        return sensor_data.get('temperature')
-    
-    @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        sensor_data = self.coordinator.data.get(self.sensor_id, {})
-        return sensor_data.get('available', False)
-
-class LoggameraWeeklyAverageSensor(CoordinatorEntity, SensorEntity):
-    """Weekly average temperature sensor for a specific lake."""
-    
-    def __init__(self, coordinator: LoggameraDataCoordinator, sensor_id: int, lake_name: str):
-        """Initialize weekly average sensor."""
-        super().__init__(coordinator)
-        self.sensor_id = sensor_id
-        self.lake_name = lake_name
-        
-        self._attr_name = f"{lake_name} Veckomedelvärde"
-        self._attr_unique_id = f"{DOMAIN}_{sensor_id}_weekly_average"
-        self._attr_device_class = SensorDeviceClass.TEMPERATURE
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-        self._attr_icon = "mdi:thermometer-water"
-        
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Return device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, DEVICE_IDENTIFIER)},
-            name=DEVICE_NAME,
-            manufacturer=DEVICE_MANUFACTURER,
-            model=DEVICE_MODEL,
-            sw_version=DEVICE_SW_VERSION,
-        )
-    
-    @property
-    def native_value(self) -> float | None:
-        """Calculate weekly average temperature."""
-        # For now, return current temperature as placeholder
-        # In a real implementation, you'd store historical data
-        sensor_data = self.coordinator.data.get(self.sensor_id, {})
-        return sensor_data.get('temperature')
-    
-    @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        sensor_data = self.coordinator.data.get(self.sensor_id, {})
-        return sensor_data.get('available', False) 
+        return True  # Status sensor is always available 
