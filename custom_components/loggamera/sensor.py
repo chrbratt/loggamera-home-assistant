@@ -1,6 +1,5 @@
 """
 Loggamera Temperature Sensor Integration for Home Assistant
-Place this file in custom_components/loggamera/sensor.py
 """
 
 import asyncio
@@ -20,14 +19,15 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .const import DOMAIN, SENSORS
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "loggamera"
-DEFAULT_SCAN_INTERVAL = 300  # 5 minutes in seconds
-MIN_SCAN_INTERVAL = 60       # 1 minute minimum
-MAX_SCAN_INTERVAL = 86400    # 24 hours maximum
-
+# Legacy YAML platform schema (for backward compatibility)
 PLATFORM_SCHEMA = vol.Schema({
     vol.Required("platform"): "loggamera",
     vol.Required("sensors"): vol.All(cv.ensure_list, [
@@ -35,19 +35,21 @@ PLATFORM_SCHEMA = vol.Schema({
             vol.Required("name"): cv.string,
             vol.Required("location_id"): cv.positive_int,
             vol.Optional("unit", default=TEMP_CELSIUS): cv.string,
-            vol.Optional("scan_interval", default=DEFAULT_SCAN_INTERVAL): vol.All(
+            vol.Optional("scan_interval", default=300): vol.All(
                 cv.positive_int, 
-                vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)
+                vol.Range(min=60, max=86400)
             ),
         })
     ])
 })
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Set up Loggamera sensors."""
-    session = async_get_clientsession(hass)
+    """Set up Loggamera sensors from YAML (deprecated)."""
+    _LOGGER.warning("YAML configuration is deprecated. Please use the UI to configure Loggamera integration.")
     
+    session = async_get_clientsession(hass)
     sensors = []
+    
     for sensor_config in config["sensors"]:
         scan_interval = timedelta(seconds=sensor_config["scan_interval"])
         
@@ -63,6 +65,39 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             sensor_config["unit"],
             sensor_config["scan_interval"]
         ))
+    
+    async_add_entities(sensors, True)
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up Loggamera sensors from config entry."""
+    session = async_get_clientsession(hass)
+    
+    # Get configuration from config entry
+    config_data = hass.data[DOMAIN][config_entry.entry_id]
+    selected_sensors = config_data["sensors"]
+    scan_interval_seconds = config_data["scan_interval"]
+    scan_interval = timedelta(seconds=scan_interval_seconds)
+    
+    sensors = []
+    
+    for sensor_id in selected_sensors:
+        if sensor_id in SENSORS:
+            coordinator = LoggameraDataUpdateCoordinator(
+                hass, session, sensor_id, scan_interval
+            )
+            await coordinator.async_config_entry_first_refresh()
+            
+            sensors.append(LoggameraTemperatureSensor(
+                coordinator,
+                f"{SENSORS[sensor_id]} Temperature",
+                sensor_id,
+                TEMP_CELSIUS,
+                scan_interval_seconds
+            ))
     
     async_add_entities(sensors, True)
 
@@ -156,7 +191,7 @@ class LoggameraTemperatureSensor(CoordinatorEntity, SensorEntity):
         """Return device info."""
         return DeviceInfo(
             identifiers={(DOMAIN, f"location_{self._location_id}")},
-            name=f"Loggamera Location {self._location_id}",
+            name=f"Loggamera {SENSORS.get(self._location_id, f'Location {self._location_id}')}",
             manufacturer="Loggamera",
             model="Temperature Sensor",
             configuration_url="https://portal.loggamera.se/",

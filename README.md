@@ -1,24 +1,24 @@
 # Loggamera Home Assistant Integration
 
-Home Assistant integration for retrieving water temperature data from Hjo Energi's Loggamera IoT sensors.
+Home Assistant integration for Hjo Energi's Loggamera water temperature sensors.
 
 ## Features
 
-- Water temperature monitoring
+- Water temperature monitoring for Lake Vättern and Lake Mullsjön
 - Configurable update intervals (1 minute to 24 hours)
-- Support for multiple sensor locations
+- Easy setup through Home Assistant UI
 - HACS compatible
-- Error handling and logging
 
 ## Installation
 
-### Via HACS (Recommended)
+### Via HACS
 
 1. Open HACS → Integrations
 2. Click ⋮ → Custom repositories
 3. Add: `chrbratt/loggamera-home-assistant`
 4. Category: `Integration`
 5. Install "Loggamera Temperature Sensors"
+6. Restart Home Assistant
 
 ### Manual Installation
 
@@ -27,7 +27,22 @@ Home Assistant integration for retrieving water temperature data from Hjo Energi
 
 ## Configuration
 
-Add to your `configuration.yaml`:
+### Using the UI (Recommended)
+
+1. Go to **Settings** → **Devices & Services**
+2. Click **Add Integration**
+3. Search for "Loggamera"
+4. Select which sensors you want:
+   - ☐ Lake Vättern (ID: 22)
+   - ☐ Lake Mullsjön (ID: 21)
+5. Choose update interval
+6. Click **Submit**
+
+Your sensors will appear automatically.
+
+### Legacy YAML Configuration
+
+*YAML configuration is deprecated but still supported:*
 
 ```yaml
 sensor:
@@ -35,7 +50,7 @@ sensor:
     sensors:
       - name: "Lake Vättern Temperature"
         location_id: 22
-        scan_interval: 300  # Optional: 60-43200 seconds
+        scan_interval: 300
       - name: "Lake Mullsjön Temperature"
         location_id: 21
         scan_interval: 600
@@ -43,28 +58,25 @@ sensor:
 
 ## Available Sensors
 
-| Location | ID | Description |
-|----------|-----|-------------|
-| Lake Vättern | 22 | Lake temperature sensor |
-| Lake Mullsjön | 21 | Lake temperature sensor |
+| Location | ID | 
+|----------|-----|
+| Lake Vättern | 22 |
+| Lake Mullsjön | 21 |
 
-## Configuration Options
+## Update Intervals
 
-| Parameter | Required | Default | Range | Description |
-|-----------|----------|---------|-------|-------------|
-| `name` | Yes | - | - | Sensor display name |
-| `location_id` | Yes | - | 21, 22 | Sensor location identifier |
-| `scan_interval` | No | 300 | 60-43200 | Update frequency in seconds |
+- 1 minute to 24 hours
+- Default: 5 minutes
+- Configurable per setup
 
 ## Requirements
 
 - Home Assistant 2023.1+
 - Internet connection
-- HACS (recommended)
 
 ## Support
 
-For issues and feature requests, please use the [GitHub issue tracker](https://github.com/chrbratt/loggamera-home-assistant/issues).
+For issues, use the [GitHub issue tracker](https://github.com/chrbratt/loggamera-home-assistant/issues).
 
 ## License
 
