@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import DeviceInfo
 
-from .const import DOMAIN, get_device_info
+from .const import DOMAIN, DEVICE_IDENTIFIER, DEVICE_NAME, DEVICE_MANUFACTURER, DEVICE_MODEL, DEVICE_SW_VERSION
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +43,13 @@ class LoggameraUpdateIntervalNumber(NumberEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info."""
-        return get_device_info()
+        return DeviceInfo(
+            identifiers={(DOMAIN, DEVICE_IDENTIFIER)},
+            name=DEVICE_NAME,
+            manufacturer=DEVICE_MANUFACTURER,
+            model=DEVICE_MODEL,
+            sw_version=DEVICE_SW_VERSION,
+        )
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the scan interval."""

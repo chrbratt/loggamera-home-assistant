@@ -4,6 +4,7 @@ import asyncio
 import logging
 import re
 from datetime import datetime, timedelta
+from homeassistant.util import dt as dt_util
 from typing import Any
 
 import aiohttp
@@ -18,7 +19,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, SENSORS, get_device_info
+from .const import DOMAIN, SENSORS, DEVICE_IDENTIFIER, DEVICE_NAME, DEVICE_MANUFACTURER, DEVICE_MODEL, DEVICE_SW_VERSION
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -129,7 +130,7 @@ class LoggameraDataManager:
                 self.failed_updates += 1
             
             self.data = new_data
-            self.last_update = datetime.now()
+            self.last_update = dt_util.now()
             
             return self.data
     
@@ -180,7 +181,13 @@ class LoggameraTemperatureSensor(SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info."""
-        return get_device_info()
+        return DeviceInfo(
+            identifiers={(DOMAIN, DEVICE_IDENTIFIER)},
+            name=DEVICE_NAME,
+            manufacturer=DEVICE_MANUFACTURER,
+            model=DEVICE_MODEL,
+            sw_version=DEVICE_SW_VERSION,
+        )
     
     @property
     def native_value(self) -> float | None:
@@ -213,7 +220,13 @@ class LoggameraLastUpdatedSensor(SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info."""
-        return get_device_info()
+        return DeviceInfo(
+            identifiers={(DOMAIN, DEVICE_IDENTIFIER)},
+            name=DEVICE_NAME,
+            manufacturer=DEVICE_MANUFACTURER,
+            model=DEVICE_MODEL,
+            sw_version=DEVICE_SW_VERSION,
+        )
     
     @property
     def native_value(self) -> datetime | None:
@@ -252,7 +265,13 @@ class LoggameraStatusSensor(SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info."""
-        return get_device_info()
+        return DeviceInfo(
+            identifiers={(DOMAIN, DEVICE_IDENTIFIER)},
+            name=DEVICE_NAME,
+            manufacturer=DEVICE_MANUFACTURER,
+            model=DEVICE_MODEL,
+            sw_version=DEVICE_SW_VERSION,
+        )
     
     @property
     def native_value(self) -> str:
