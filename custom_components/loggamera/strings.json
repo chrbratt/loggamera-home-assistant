@@ -1,22 +1,22 @@
 {
   "config": {
-    "title": "Loggamera Temperature Sensors",
+    "title": "Badtemperaturer Hjo Energi",
     "step": {
       "user": {
-        "title": "Konfigurera Loggamera Sensorer",
-        "description": "Denna integration hämtar temperaturdata från Loggamera-plattformen för {sensors}.",
+        "title": "Konfigurera Badtemperaturer",
+        "description": "Hämta badtemperaturer från Vättern och Mullsjön via Hjo Energi AB.",
         "data": {
           "setup": "Konfigurera sensorer"
         }
       }
     },
     "error": {
-      "cannot_connect": "Kunde inte ansluta till Loggamera",
-      "invalid_response": "Ogiltigt svar från server",
+      "cannot_connect": "Kunde inte ansluta till temperatursensorer",
+      "invalid_response": "Kunde inte läsa temperaturdata",
       "unknown": "Oväntat fel inträffade"
     },
     "abort": {
-      "already_configured": "Loggamera är redan konfigurerad"
+      "already_configured": "Badtemperaturer är redan konfigurerade"
     }
   }
 } 

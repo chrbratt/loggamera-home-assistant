@@ -1,7 +1,7 @@
 {
   "domain": "loggamera",
-  "name": "Loggamera Temperature Sensors",
-  "version": "2.1.1",
+  "name": "Badtemperaturer Hjo Energi",
+  "version": "1.0.0",
   "documentation": "https://github.com/chrbratt/loggamera-home-assistant",
   "issue_tracker": "https://github.com/chrbratt/loggamera-home-assistant/issues",
   "dependencies": [],
@@ -12,6 +12,6 @@
   ],
   "iot_class": "cloud_polling",
   "config_flow": true,
-  "integration_type": "hub",
+  "integration_type": "device",
   "import_executor": false
 } 
