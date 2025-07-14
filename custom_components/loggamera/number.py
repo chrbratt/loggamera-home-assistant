@@ -68,14 +68,11 @@ class LoggameraUpdateIntervalNumber(NumberEntity):
         
         _LOGGER.info(f"Updated scan interval to {int(value)} seconds")
         
-        # Update data manager if it exists
-        if DOMAIN in self.hass.data and self._config_entry.entry_id in self.hass.data[DOMAIN]:
-            # Get the data manager from sensor platform
-            for entity in self.hass.data[DOMAIN].get("entities", []):
-                if hasattr(entity, 'data_manager'):
-                    entity.data_manager.scan_interval = timedelta(seconds=int(value))
-                    _LOGGER.info(f"Updated data manager scan interval to {int(value)} seconds")
-                    break
+        # Update coordinator if it exists
+        if DOMAIN in self.hass.data and "coordinator" in self.hass.data[DOMAIN]:
+            coordinator = self.hass.data[DOMAIN]["coordinator"]
+            coordinator.update_interval = timedelta(seconds=int(value))
+            _LOGGER.info(f"Updated coordinator scan interval to {int(value)} seconds")
         
         # Notify user that restart may be needed for full effect
         from homeassistant.components.persistent_notification import async_create
