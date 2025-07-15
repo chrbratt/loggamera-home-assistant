@@ -8,40 +8,37 @@ Denna guide visar hur du lägger till dygns- och veckomedelvärden för dina bad
 - Gå till **Inställningar → Enheter & tjänster → Lägg till integration**
 - Sök efter **"Statistik"** och lägg till den
 
-### 2. Lägg till YAML-kod
-Kopiera och klistra in detta i din `configuration.yaml`:
+### 2. Skapa statistik-sensorer via UI
+1. Gå till **Inställningar → Enheter & tjänster → Hjälpare**
+2. Sök efter **"Statistik"** och klicka på det
+3. Fyll i följande för varje sensor:
 
-```yaml
-# Dygnsmedelvärde (24h)
-sensor:
-  - platform: statistics
-    name: "Vättern Dygnsmedelvärde"
-    entity_id: sensor.vattern_badtemperatur
-    state_characteristic: mean
-    sampling_size: 288  # 5-minutersintervall på ett dygn
+#### Vättern Dygnsmedelvärde:
+- **Entity ID:** `sensor.vattern_badtemperatur`
+- **Name:** `Vättern Dygnsmedelvärde`
+- **State Characteristic:** `mean`
+- **Sampling Size:** `288` (5-minutersintervall på ett dygn)
 
-  - platform: statistics
-    name: "Mullsjön Dygnsmedelvärde"
-    entity_id: sensor.mullsjon_badtemperatur
-    state_characteristic: mean
-    sampling_size: 288
+#### Mullsjön Dygnsmedelvärde:
+- **Entity ID:** `sensor.mullsjon_badtemperatur`
+- **Name:** `Mullsjön Dygnsmedelvärde`
+- **State Characteristic:** `mean`
+- **Sampling Size:** `288`
 
-# Veckomedelvärde (7 dagar)
-  - platform: statistics
-    name: "Vättern Veckomedelvärde"
-    entity_id: sensor.vattern_badtemperatur
-    state_characteristic: mean
-    sampling_size: 2016  # 5-minutersintervall på en vecka
+#### Vättern Veckomedelvärde:
+- **Entity ID:** `sensor.vattern_badtemperatur`
+- **Name:** `Vättern Veckomedelvärde`
+- **State Characteristic:** `mean`
+- **Sampling Size:** `2016` (5-minutersintervall på en vecka)
 
-  - platform: statistics
-    name: "Mullsjön Veckomedelvärde"
-    entity_id: sensor.mullsjon_badtemperatur
-    state_characteristic: mean
-    sampling_size: 2016
-```
+#### Mullsjön Veckomedelvärde:
+- **Entity ID:** `sensor.mullsjon_badtemperatur`
+- **Name:** `Mullsjön Veckomedelvärde`
+- **State Characteristic:** `mean`
+- **Sampling Size:** `2016`
 
-### 3. Starta om Home Assistant
-Efter att du lagt till koden, starta om Home Assistant för att aktivera sensorerna.
+### 3. Sensorerna skapas automatiskt
+Efter att du fyllt i formuläret och sparat skapas sensorerna automatiskt.
 
 ## Tillgängliga sensorer
 
@@ -65,8 +62,8 @@ Efter att du lagt till koden, starta om Home Assistant för att aktivera sensore
 
 **Problem:** Sensorer visas inte
 - Kontrollera att statistik-integrationen är aktiverad
-- Kontrollera att YAML-syntaxen är korrekt
-- Starta om Home Assistant
+- Kontrollera att du använt rätt Entity ID
+- Kontrollera att ursprungssensorerna finns
 
 **Problem:** Inga värden visas
 - Vänta några timmar för att samla in data
@@ -75,19 +72,13 @@ Efter att du lagt till koden, starta om Home Assistant för att aktivera sensore
 ## Avancerade inställningar
 
 ### Anpassa samplingsintervall
-```yaml
-# För 10-minutersintervall istället för 5-minuter
-sampling_size: 144  # 24h * 6 per timme
-```
+För 10-minutersintervall istället för 5-minuter, använd:
+- **Sampling Size:** `144` (24h * 6 per timme)
 
 ### Lägg till min/max-värden
-```yaml
-- platform: statistics
-  name: "Vättern Dygns Maximum"
-  entity_id: sensor.vattern_badtemperatur
-  state_characteristic: max
-  sampling_size: 288
-```
+Skapa nya statistik-sensorer via UI med:
+- **State Characteristic:** `max` eller `min`
+- **Name:** `Vättern Dygns Maximum` eller `Vättern Dygns Minimum`
 
 ## Varför använda Home Assistant's statistik?
 

@@ -32,43 +32,36 @@ För dygns- och veckomedelvärden använd Home Assistant's inbyggda statistik-in
 1. Gå till **Inställningar → Enheter & tjänster → Lägg till integration**
 2. Sök efter **"Statistik"** och lägg till den
 
-### Steg 2: Lägg till statistik-sensorer (copy-paste)
+### Steg 2: Skapa statistik-sensorer via UI
+1. Gå till **Inställningar → Enheter & tjänster → Hjälpare**
+2. Sök efter **"Statistik"** och klicka på det
+3. Fyll i följande för varje sensor:
 
-Kopiera och klistra in detta i din `configuration.yaml`:
+**Vättern Dygnsmedelvärde:**
+- **Entity ID:** `sensor.vattern_badtemperatur`
+- **Name:** `Vättern Dygnsmedelvärde`
+- **State Characteristic:** `mean`
+- **Sampling Size:** `288` (5-minutersintervall på ett dygn)
 
-```yaml
-# Dygnsmedelvärde (24h) för Vättern och Mullsjön
-sensor:
-  - platform: statistics
-    name: "Vättern Dygnsmedelvärde"
-    entity_id: sensor.vattern_badtemperatur
-    state_characteristic: mean
-    sampling_size: 288  # 5-minutersintervall på ett dygn
+**Mullsjön Dygnsmedelvärde:**
+- **Entity ID:** `sensor.mullsjon_badtemperatur`
+- **Name:** `Mullsjön Dygnsmedelvärde`
+- **State Characteristic:** `mean`
+- **Sampling Size:** `288`
 
-  - platform: statistics
-    name: "Mullsjön Dygnsmedelvärde"
-    entity_id: sensor.mullsjon_badtemperatur
-    state_characteristic: mean
-    sampling_size: 288
+**Vättern Veckomedelvärde:**
+- **Entity ID:** `sensor.vattern_badtemperatur`
+- **Name:** `Vättern Veckomedelvärde`
+- **State Characteristic:** `mean`
+- **Sampling Size:** `2016` (5-minutersintervall på en vecka)
 
-# Veckomedelvärde (7 dagar)
-  - platform: statistics
-    name: "Vättern Veckomedelvärde"
-    entity_id: sensor.vattern_badtemperatur
-    state_characteristic: mean
-    sampling_size: 2016  # 5-minutersintervall på en vecka
+**Mullsjön Veckomedelvärde:**
+- **Entity ID:** `sensor.mullsjon_badtemperatur`
+- **Name:** `Mullsjön Veckomedelvärde`
+- **State Characteristic:** `mean`
+- **Sampling Size:** `2016`
 
-  - platform: statistics
-    name: "Mullsjön Veckomedelvärde"
-    entity_id: sensor.mullsjon_badtemperatur
-    state_characteristic: mean
-    sampling_size: 2016
-```
-
-### Steg 3: Starta om Home Assistant
-Efter att du lagt till YAML-koden, starta om Home Assistant för att aktivera statistik-sensorerna.
-
-### Steg 4: Visa i Lovelace
+### Steg 3: Visa i Lovelace
 Lägg till en "Sensor card" och välj t.ex. `sensor.vattern_dygnsmedelvarde` eller `sensor.mullsjon_veckomedelvarde`.
 
 ### Tillgängliga sensorer
